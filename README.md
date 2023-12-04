@@ -20,10 +20,13 @@ For help getting started with Flutter, view our
 [online documentation](https://flutter.dev/docs), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
-# How to Use
+## How to Use
 This project uses Windows native APIs to get the performance data, so it can only run on Windows.
 
-# To Build The Native Library
+## To Build The Native Library
+The dll files are already included in the project, so you don't need to build them yourself.  
+But if you want to build it yourself anyway, follow the steps below:
+
 1. Enter the directory *./native/*
 2. Create a build output directory e.g. *build*: `mkdir build`
 3. Enter the build directory: `cd build`
