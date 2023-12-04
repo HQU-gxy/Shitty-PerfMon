@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(shitty_perf_mon LANGUAGES CXX)
+project(shitty_perf_mon LANGUAGES C CXX)
 
 set(BINARY_NAME "shitty_perf_mon")
 
@@ -94,5 +94,3 @@ install(FILES "${AOT_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
   CONFIGURATIONS Profile;Release
   COMPONENT Runtime)
 
-include_directories(WMIFucker)
-add_library(WMIFucker SHARED WMIFucker/WMIFucker.cpp)
