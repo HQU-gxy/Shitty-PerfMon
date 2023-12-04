@@ -1,9 +1,8 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:shitty_perf_mon/WMIFuckerWrapper.dart';
+import 'package:shitty_perf_mon/NativeLibWrapper.dart';
 
 import '../windows_system_info/lib/windows_system_info.dart';
 

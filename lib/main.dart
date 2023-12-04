@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 
-import 'package:shitty_perf_mon/WMIFuckerWrapper.dart';
+import 'package:shitty_perf_mon/NativeLibWrapper.dart';
 import 'package:shitty_perf_mon/pages/CPUInfoPage.dart';
 import 'package:shitty_perf_mon/pages/DiskInfoPage.dart';
 import 'package:shitty_perf_mon/pages/MemoryInfoPage.dart';
@@ -60,7 +60,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-
-
-

@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 
 final wmiLib = DynamicLibrary.open('dll/WMIFucker.dll');
+final driveUsageLib = DynamicLibrary.open('dll/DriveUsageInfo.dll');
 
 final class ProcessInfoNative extends Struct {
   external Pointer<Utf8> name;
@@ -18,6 +19,14 @@ final class CPUInfoNative extends Struct {
   @Uint8()
   external int totalUsage;
   external Pointer<Uint8> coreUsages;
+}
+
+final class DriveUsageInfoNative extends Struct {
+  external Pointer<Utf8> letter;
+  @Uint64()
+  external int totalSize;
+  @Uint64()
+  external int freeSpace;
 }
 
 final class ProcessInfo {
@@ -36,6 +45,14 @@ final class CpuUsageInfo {
   final List<int> coreUsages;
 }
 
+final class DriveUsageInfo {
+  DriveUsageInfo(this.driveLetter, this.totalSize, this.freeSpace);
+
+  final String driveLetter;
+  final int freeSpace;
+  final int totalSize;
+}
+
 final wmiFuckerInit =
     wmiLib.lookupFunction<Void Function(), void Function()>('init');
 
@@ -49,6 +66,10 @@ final getMemoryUsageNative =
 final getCpuUsageNative = wmiLib.lookupFunction<
     Bool Function(Pointer<CPUInfoNative>),
     bool Function(Pointer<CPUInfoNative>)>('getCpuUsage');
+
+final getDriveUsageNative = driveUsageLib.lookupFunction<
+    Int Function(Pointer<DriveUsageInfoNative>),
+    int Function(Pointer<DriveUsageInfoNative>)>('getDriveUsage');
 
 double getMemoryUsageInGB() {
   return getMemoryUsageNative() / (1024 * 1024 * 1024);
@@ -82,4 +103,23 @@ List<ProcessInfo> getProcessList() {
   }
 
   return processes;
+}
+
+List<DriveUsageInfo> getDriveUsageList() {
+  Pointer<DriveUsageInfoNative> pInfo = Arena().call(100);
+  for(var i = 0; i < 100; i++) {
+    pInfo.elementAt(i).ref.letter = calloc.allocate(5);
+  }
+
+  final driveUsageList = <DriveUsageInfo>[];
+  int nd = getDriveUsageNative(pInfo);
+  for (var a = 0; a < nd; a++) {
+    final p = pInfo.elementAt(a).ref;
+    driveUsageList
+        .add(DriveUsageInfo(p.letter.toDartString(), p.totalSize, p.freeSpace));
+  }
+  for(var i = 0; i < 100; i++) {
+    calloc.free(pInfo.elementAt(i).ref.letter);
+  }
+  return driveUsageList;
 }

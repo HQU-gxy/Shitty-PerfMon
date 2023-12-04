@@ -1,10 +1,9 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
-import '../WMIFuckerWrapper.dart';
+import '../NativeLibWrapper.dart';
 import '../windows_system_info/lib/windows_system_info.dart';
 
 class CPUInfoPage extends StatefulWidget {
@@ -22,6 +21,8 @@ class _CPUInfoPageState extends State<CPUInfoPage> {
 
   final nSpots = 30;
   final refreshPeriod = 2;
+
+  var showOverallUsage = true;
 
   Future<void> updateChart() async {
     if (await WindowsSystemInfo.isInitilized) {
@@ -55,6 +56,7 @@ class _CPUInfoPageState extends State<CPUInfoPage> {
                 ? Text('Loading...',
                     style: TextStyle(fontSize: 20, fontStyle: FontStyle.italic))
                 : Column(mainAxisSize: MainAxisSize.min, children: [
+                    Text('Vendor: ${cpuInfo!.vendor}'),
                     Text('Clock Speed: ${cpuInfo!.speed} MHz'),
                     Text('Logical Cores: ${cpuInfo!.cores}'),
                     Text('Physical Cores: ${cpuInfo!.physicalCores}'),
@@ -70,7 +72,8 @@ class _CPUInfoPageState extends State<CPUInfoPage> {
         });
   }
 
-  LineChartData getLineChartData() {
+  ///coreIndex == -1 means overall usage
+  LineChartData getLineChartData(int coreIndex) {
     return LineChartData(
         gridData: FlGridData(
           show: true,
@@ -125,7 +128,9 @@ class _CPUInfoPageState extends State<CPUInfoPage> {
                   cpuUsage.length,
                   (index) => FlSpot(
                       refreshPeriod * (index.toDouble() - cpuUsage.length + 1),
-                      cpuUsage[index].totalUsage.toDouble())),
+                      coreIndex == -1
+                          ? cpuUsage[index].totalUsage.toDouble()
+                          : cpuUsage[index].coreUsages[coreIndex].toDouble())),
               isCurved: true,
               dotData: FlDotData(show: false),
               gradient: LinearGradient(
@@ -146,6 +151,16 @@ class _CPUInfoPageState extends State<CPUInfoPage> {
                     ].map((e) => e.withOpacity(0.5)).toList(),
                   )))
         ]);
+  }
+
+  Widget buildLineChart() {
+    return showOverallUsage
+        ? LineChart(getLineChartData(-1))
+        : GridView.count(
+            crossAxisCount: 4,
+            children: List.generate(cpuUsage[0].nCores, (index) {
+              return LineChart(getLineChartData(index));
+            }));
   }
 
   @override
@@ -175,7 +190,24 @@ class _CPUInfoPageState extends State<CPUInfoPage> {
       Padding(
           padding:
               const EdgeInsets.only(left: 16, top: 80, right: 64, bottom: 64),
-          child: LineChart(getLineChartData())),
+          child: buildLineChart()),
+      Positioned(
+          bottom: 16,
+          right: 16,
+          child: TextButton(
+              style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(
+                      Colors.cyanAccent.withOpacity(0.2))),
+              onPressed: () => {
+                    setState(() {
+                      showOverallUsage = !showOverallUsage;
+                    })
+                  },
+              child: Text(
+                  showOverallUsage
+                      ? "Show Per Core Usage"
+                      : "Show Overall Usage",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))))
     ]);
   }
 }
